@@ -1,48 +1,63 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
-
+import { useState, useCallback } from "react";
+import { View, RefreshControl } from "react-native";
 import { ScreenContainer } from "@/components/screen-container";
+import { GalleryGrid } from "@/components/gallery-grid";
+import { ImageDetailView } from "@/components/image-detail-view";
+import { useGallery, GalleryImage } from "@/lib/gallery-context";
+import { useColors } from "@/hooks/use-colors";
 
-/**
- * Home Screen - NativeWind Example
- *
- * This template uses NativeWind (Tailwind CSS for React Native).
- * You can use familiar Tailwind classes directly in className props.
- *
- * Key patterns:
- * - Use `className` instead of `style` for most styling
- * - Theme colors: use tokens directly (bg-background, text-foreground, bg-primary, etc.); no dark: prefix needed
- * - Responsive: standard Tailwind breakpoints work on web
- * - Custom colors defined in tailwind.config.js
- */
 export default function HomeScreen() {
+  const { images, isLoading } = useGallery();
+  const colors = useColors();
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
+
+  const handleImagePress = (image: GalleryImage, index: number) => {
+    setSelectedImage(image);
+    setSelectedIndex(index);
+  };
+
+  const handleNavigate = (direction: "prev" | "next") => {
+    const newIndex = direction === "prev" ? selectedIndex - 1 : selectedIndex + 1;
+    if (newIndex >= 0 && newIndex < images.length) {
+      setSelectedImage(images[newIndex]);
+      setSelectedIndex(newIndex);
+    }
+  };
+
+  const canNavigate = (direction: "prev" | "next") => {
+    if (direction === "prev") return selectedIndex > 0;
+    return selectedIndex < images.length - 1;
+  };
+
+  if (selectedImage) {
+    return (
+      <ImageDetailView
+        image={selectedImage}
+        onClose={() => setSelectedImage(null)}
+        onNavigate={handleNavigate}
+        canNavigate={canNavigate}
+      />
+    );
+  }
+
   return (
-    <ScreenContainer className="p-6">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-8">
-          {/* Hero Section */}
-          <View className="items-center gap-2">
-            <Text className="text-4xl font-bold text-foreground">Welcome</Text>
-            <Text className="text-base text-muted text-center">
-              Edit app/(tabs)/index.tsx to get started
-            </Text>
-          </View>
-
-          {/* Example Card */}
-          <View className="w-full max-w-sm self-center bg-surface rounded-2xl p-6 shadow-sm border border-border">
-            <Text className="text-lg font-semibold text-foreground mb-2">NativeWind Ready</Text>
-            <Text className="text-sm text-muted leading-relaxed">
-              Use Tailwind CSS classes directly in your React Native components.
-            </Text>
-          </View>
-
-          {/* Example Button */}
-          <View className="items-center">
-            <TouchableOpacity className="bg-primary px-6 py-3 rounded-full active:opacity-80">
-              <Text className="text-background font-semibold">Get Started</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+    <ScreenContainer className="p-0" edges={["top", "left", "right"]}>
+      <GalleryGrid
+        images={images}
+        onImagePress={handleImagePress}
+        isLoading={isLoading}
+        numColumns={2}
+        contentContainerStyle={{
+          paddingBottom: 20,
+        }}
+      />
     </ScreenContainer>
   );
 }

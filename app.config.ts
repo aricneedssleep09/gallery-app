@@ -28,11 +28,11 @@ const schemeFromBundleId = `manus${timestamp}`;
 
 const env = {
   // App branding - update these values directly (do not use env vars)
-  appName: "Android App",
+  appName: "Gallery",
   appSlug: "android-app",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "https://d2xsxph8kpxj0f.cloudfront.net/310519663594490531/Dja5wiA44veVDJBEjuP3DF/icon-EKvgADotsKaSt8X52kiKfy.webp",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -42,10 +42,13 @@ const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
   version: "1.0.0",
+  description: "A beautiful, open-source gallery app for browsing and managing photos with an elegant UI.",
   orientation: "portrait",
+  runtimeVersion: "1.0.0",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
   userInterfaceStyle: "automatic",
+  jsEngine: "hermes",
   newArchEnabled: true,
   ios: {
     supportsTablet: true,
